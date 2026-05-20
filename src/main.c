@@ -128,45 +128,71 @@ int lsh_exit(char **args)
 ///////////////////////////
 int lsh_pwd(char **args)
 {
-  char cwd[1024];
-  if (getcwd(cwd, sizeof(cwd)) != NULL) {
+  if (args[1] != NULL) {
+    fprintf(stderr, "lsh: pwd: too many arguments\n");
+    return 1;
+  }
+
+  char *cwd = getcwd(NULL, 0);
+
+  if (cwd != NULL) {
     printf("%s\n", cwd);
+    free(cwd);
   } else {
     perror("pwd");
   }
+
   return 1;
 }
 
 int lsh_echo(char **args)
 {
-  int i = 1;
-  while (args[i] != NULL) {
-    printf("%s ", args[i]);
-    i++;
+  for (int i = 1; args[i] != NULL; i++) {
+
+    printf("%s", args[i]);
+
+    if (args[i + 1] != NULL) {
+      printf(" ");
+    }
   }
+
   printf("\n");
+
   return 1;
 }
 
 int lsh_history(char **args)
 {
+  if (args[1] != NULL) {
+    fprintf(stderr, "lsh: history: too many arguments\n");
+    return 1;
+  }
+
   for (int i = 0; i < history_count; i++) {
-    // Print without the trailing newline that fgets/getline might leave
+
+    size_t len = strlen(history[i]);
+
     printf("%d %s", i + 1, history[i]);
-    if (history[i][strlen(history[i])-1] != '\n') {
-        printf("\n");
+
+    if (len == 0 || history[i][len - 1] != '\n') {
+      printf("\n");
     }
   }
+
   return 1;
 }
 
 int lsh_env(char **args)
 {
-  int i = 0;
-  while (environ[i] != NULL) {
-    printf("%s\n", environ[i]);
-    i++;
+  if (args[1] != NULL) {
+    fprintf(stderr, "lsh: env: too many arguments\n");
+    return 1;
   }
+
+  for (int i = 0; environ[i] != NULL; i++) {
+    printf("%s\n", environ[i]);
+  }
+
   return 1;
 }
 
